@@ -1,14 +1,14 @@
 {
   "name": "mic-recorder-to-mp3",
   "version": "2.2.2",
-  "description": "Record your microphone audio input and get an audio/mp3 ouput buffer/blob.",
+  "description": "Record your microphone audio input and get an audio/mp3 output buffer/blob.",
   "main": "dist/index.js",
   "scripts": {
     "build": "rollup -c",
     "minify": "minify=true rollup -c",
     "watch": "rollup -c -w"
   },
-  "repository": "git@github.com:closeio/mic-recorder-to-mp3.git",
+  "repository": "git@github.com:khanjandobariya/mic-recorder-to-mp3.git",
   "author": "Djalma Araujo <djalma@close.io>",
   "contributors": [
     "Vitor Buzinaro <vitor@close.io>"
@@ -38,10 +38,10 @@
       "external-helpers"
     ]
   },
-  "dependencies": {
-    "lamejs": "^1.2.0"
-  },
   "peerDependencies": {
     "webrtc-adapter": ">=4.1.1"
+  },
+  "dependencies": {
+    "lamejs": "github:zhuker/lamejs"
   }
 }
