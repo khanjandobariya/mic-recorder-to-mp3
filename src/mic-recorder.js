@@ -75,12 +75,14 @@ class MicRecorder {
       }
 
       this.processor.onaudioprocess = null;
-
-      // Stop all audio tracks. Also, removes recording icon from chrome tab
-      this.activeStream.getAudioTracks().forEach((track) => track.stop());
     }
 
     return this;
+  }
+
+  stopTracks() {
+    // Stop all audio tracks. Also, removes recording icon from chrome tab
+    this.activeStream.getAudioTracks().forEach((track) => track.stop());
   }
 
   /**

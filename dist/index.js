@@ -15910,14 +15910,17 @@ var MicRecorder = function () {
         }
 
         this.processor.onaudioprocess = null;
-
-        // Stop all audio tracks. Also, removes recording icon from chrome tab
-        this.activeStream.getAudioTracks().forEach(function (track) {
-          return track.stop();
-        });
       }
 
       return this;
+    }
+  }, {
+    key: "stopTracks",
+    value: function stopTracks() {
+      // Stop all audio tracks. Also, removes recording icon from chrome tab
+      this.activeStream.getAudioTracks().forEach(function (track) {
+        return track.stop();
+      });
     }
 
     /**
