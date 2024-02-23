@@ -15857,12 +15857,10 @@ var MicRecorder = function () {
 
   createClass(MicRecorder, [{
     key: "addMicrophoneListener",
-    value: function addMicrophoneListener(stream) {
+    value: function addMicrophoneListener() {
       var _this = this;
 
-      var listener = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : function () {};
-
-      this.activeStream = stream;
+      var listener = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : function () {};
 
       // This prevents the weird noise once you start listening to the microphone
       this.timerToStart = setTimeout(function () {
@@ -15870,7 +15868,7 @@ var MicRecorder = function () {
       }, this.config.startRecordingAt);
 
       // Set up Web Audio API to process data from the media stream (microphone).
-      this.microphone = this.context.createMediaStreamSource(stream);
+      this.microphone = this.context.createMediaStreamSource(this.activeStream);
 
       // Settings a bufferSize of 0 instructs the browser to choose the best bufferSize
       this.processor = this.context.createScriptProcessor(0, 1, 1);
@@ -15918,9 +15916,11 @@ var MicRecorder = function () {
     key: "stopTracks",
     value: function stopTracks() {
       // Stop all audio tracks. Also, removes recording icon from chrome tab
-      this.activeStream.getAudioTracks().forEach(function (track) {
-        return track.stop();
-      });
+      if (this.activeStream) {
+        this.activeStream.getAudioTracks().forEach(function (track) {
+          return track.stop();
+        });
+      }
     }
 
     /**
@@ -15942,7 +15942,8 @@ var MicRecorder = function () {
 
       return new Promise(function (resolve, reject) {
         navigator.mediaDevices.getUserMedia({ audio: audio }).then(function (stream) {
-          _this2.addMicrophoneListener(stream);
+          _this2.activeStream = stream;
+          _this2.addMicrophoneListener();
           resolve(stream);
         }).catch(function (err) {
           reject(err);
@@ -15958,15 +15959,20 @@ var MicRecorder = function () {
 
   }, {
     key: "startWithStream",
-    value: function startWithStream(stream) {
-      var listener = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : function () {};
+    value: function startWithStream() {
+      var listener = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : function () {};
 
       var AudioContext = window.AudioContext || window.webkitAudioContext;
       this.context = new AudioContext();
       this.config.sampleRate = this.context.sampleRate;
       this.lameEncoder = new Encoder(this.config);
 
-      this.addMicrophoneListener(stream, listener);
+      this.addMicrophoneListener(listener);
+    }
+  }, {
+    key: "setStream",
+    value: function setStream(stream) {
+      this.activeStream = stream;
     }
 
     /**

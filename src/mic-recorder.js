@@ -29,16 +29,14 @@ class MicRecorder {
    * @param {MediaStream} stream
    * @param {() => {}} function
    */
-  addMicrophoneListener(stream, listener = () => {}) {
-    this.activeStream = stream;
-
+  addMicrophoneListener(listener = () => {}) {
     // This prevents the weird noise once you start listening to the microphone
     this.timerToStart = setTimeout(() => {
       delete this.timerToStart;
     }, this.config.startRecordingAt);
 
     // Set up Web Audio API to process data from the media stream (microphone).
-    this.microphone = this.context.createMediaStreamSource(stream);
+    this.microphone = this.context.createMediaStreamSource(this.activeStream);
 
     // Settings a bufferSize of 0 instructs the browser to choose the best bufferSize
     this.processor = this.context.createScriptProcessor(0, 1, 1);
@@ -82,7 +80,9 @@ class MicRecorder {
 
   stopTracks() {
     // Stop all audio tracks. Also, removes recording icon from chrome tab
-    this.activeStream.getAudioTracks().forEach((track) => track.stop());
+    if (this.activeStream) {
+      this.activeStream.getAudioTracks().forEach((track) => track.stop());
+    }
   }
 
   /**
@@ -103,7 +103,8 @@ class MicRecorder {
       navigator.mediaDevices
         .getUserMedia({ audio })
         .then((stream) => {
-          this.addMicrophoneListener(stream);
+          this.activeStream = stream;
+          this.addMicrophoneListener();
           resolve(stream);
         })
         .catch(function (err) {
@@ -117,13 +118,17 @@ class MicRecorder {
    * @param {mediaSteam} stream
    * @param {() => {}} listener
    */
-  startWithStream(stream, listener = () => {}) {
+  startWithStream(listener = () => {}) {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     this.context = new AudioContext();
     this.config.sampleRate = this.context.sampleRate;
     this.lameEncoder = new Encoder(this.config);
 
-    this.addMicrophoneListener(stream, listener);
+    this.addMicrophoneListener(listener);
+  }
+
+  setStream(stream) {
+    this.activeStream = stream;
   }
 
   /**
