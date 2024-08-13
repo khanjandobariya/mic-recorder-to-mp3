@@ -15844,7 +15844,7 @@ var MicRecorder = function () {
     this.microphone = null;
     this.processor = null;
     this.startTime = 0;
-    this.rawChunksBuffer = null;
+
     Object.assign(this.config, config);
   }
 
@@ -15880,9 +15880,8 @@ var MicRecorder = function () {
         }
         listener(event.inputBuffer.getChannelData(0));
 
-        // Save copy of raw chunk for future encoding
-        var rawChunk = event.inputBuffer.getChannelData(0);
-        _this.rawChunksBuffer.push(Object.assign([], rawChunk));
+        // Send microphone data to LAME for MP3 encoding while recording.
+        _this.lameEncoder.encode(event.inputBuffer.getChannelData(0));
       };
 
       // Begin retrieving microphone data.
@@ -15986,10 +15985,6 @@ var MicRecorder = function () {
     value: function getMp3() {
       var _this3 = this;
 
-      this.rawChunksBuffer.forEach(function (rawChunk) {
-        _this3.lameEncoder.encode(rawChunk);
-      });
-      this.rawChunksBuffer = null;
       var finalBuffer = this.lameEncoder.finish();
 
       return new Promise(function (resolve, reject) {
