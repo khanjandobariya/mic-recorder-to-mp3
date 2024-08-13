@@ -29,7 +29,7 @@
   <script>
     const button = document.querySelector('button');
     const recorder = new MicRecorder({
-      bitRate: 96
+      bitRate: 128
     });
 
     button.addEventListener('click', startRecording);
@@ -42,8 +42,7 @@
       navigator.mediaDevices
         .getUserMedia({ audio: true })
         .then((stream) => {
-          recorder.setStream(stream);
-          recorder.startWithStream(listener);
+          recorder.startWithStream(stream, listener)
           button.textContent = 'Stop recording';
           button.classList.toggle('btn-danger');
           button.removeEventListener('click', startRecording);
