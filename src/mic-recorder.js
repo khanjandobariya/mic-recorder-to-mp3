@@ -20,7 +20,6 @@ class MicRecorder {
     this.microphone = null;
     this.processor = null;
     this.startTime = 0;
-
     Object.assign(this.config, config);
   }
 
@@ -48,8 +47,9 @@ class MicRecorder {
       }
       listener(event.inputBuffer.getChannelData(0));
 
-      // Send microphone data to LAME for MP3 encoding while recording.
-      this.lameEncoder.encode(event.inputBuffer.getChannelData(0));
+      // Save copy of raw chunk for future encoding
+      const rawChunk = event.inputBuffer.getChannelData(0);
+      this.rawChunksBuffer.push(Object.assign([], rawChunk));
     };
 
     // Begin retrieving microphone data.
@@ -94,6 +94,7 @@ class MicRecorder {
     this.context = new AudioContext();
     this.config.sampleRate = this.context.sampleRate;
     this.lameEncoder = new Encoder(this.config);
+    this.rawChunksBuffer = [];
 
     const audio = this.config.deviceId
       ? { deviceId: { exact: this.config.deviceId } }
@@ -123,6 +124,7 @@ class MicRecorder {
     this.context = new AudioContext();
     this.config.sampleRate = this.context.sampleRate;
     this.lameEncoder = new Encoder(this.config);
+    this.rawChunksBuffer = [];
 
     this.addMicrophoneListener(listener);
   }
@@ -136,6 +138,10 @@ class MicRecorder {
    * @return {Promise}
    */
   getMp3() {
+    this.rawChunksBuffer.forEach((rawChunk) => {
+      this.lameEncoder.encode(rawChunk);
+    });
+    this.rawChunksBuffer = null;
     const finalBuffer = this.lameEncoder.finish();
 
     return new Promise((resolve, reject) => {
